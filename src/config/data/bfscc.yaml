@@ -1,0 +1,3 @@
+data_dir: mario-dg/brightfield-microscopy-scc
+image_resolution: 512
+HF_DATASET_IMAGE_KEY: "image"
