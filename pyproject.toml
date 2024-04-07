@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["mario-dg <mario.dagraca@gmx.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "3.10.10"
@@ -212,6 +213,8 @@ y-py = "0.6.2"
 yarl = "1.9.4"
 ypy-websocket = "0.8.4"
 zipp = "3.17.0"
+jsonlines = "^4.0.0"
+tk = "^0.1.0"
 
 [[tool.poetry.source]]
 name = "pytorch"

@@ -1685,6 +1685,20 @@ files = [
 dev = ["hypothesis"]
 
 [[package]]
+name = "jsonlines"
+version = "4.0.0"
+description = "Library with helpers for the jsonlines file format"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "jsonlines-4.0.0-py3-none-any.whl", hash = "sha256:185b334ff2ca5a91362993f42e83588a360cf95ce4b71a73548502bda52a7c55"},
+    {file = "jsonlines-4.0.0.tar.gz", hash = "sha256:0c6d2c09117550c089995247f605ae4cf77dd1533041d366351f6f298822ea74"},
+]
+
+[package.dependencies]
+attrs = ">=19.2.0"
+
+[[package]]
 name = "jsonpointer"
 version = "2.4"
 description = "Identify specific nodes in a JSON document (RFC 6901)"
@@ -4750,6 +4764,17 @@ doc = ["sphinx", "sphinx_rtd_theme"]
 test = ["flake8", "isort", "pytest"]
 
 [[package]]
+name = "tk"
+version = "0.1.0"
+description = "TensorKit is a deep learning helper between Python and C++."
+optional = false
+python-versions = "*"
+files = [
+    {file = "tk-0.1.0-py3-none-any.whl", hash = "sha256:703a69ff0d5ba2bd2f7440582ad10160e4a6561595d33457dc6caa79b9bf4930"},
+    {file = "tk-0.1.0.tar.gz", hash = "sha256:60bc8923d5d35f67f5c6bd93d4f0c49d2048114ec077768f959aef36d4ed97f8"},
+]
+
+[[package]]
 name = "tokenizers"
 version = "0.15.2"
 description = ""
@@ -5727,4 +5752,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.10"
-content-hash = "b25572879a5e67f553d29f8958aec8f0a30c65e536b543b125a55ac3203e759a"
+content-hash = "e75fd8fb7b28def22afbd2f4fe43700fbd2f0230bb26bdd8e5372ccb86011d84"
