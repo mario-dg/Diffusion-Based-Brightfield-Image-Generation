@@ -1,0 +1,53 @@
+defaults:
+  - model@models.unet:  scc_v1 # diffusers_native
+  - data: bfscc
+  - scheduler@training.scheduler: ddim
+  - scheduler@inference.scheduler: ddim
+  - logger: wandb
+  - _self_
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+
+hydra:
+  output_subdir: null
+  run:
+    dir: ./
+
+resume_from_checkpoint: null
+
+pl_trainer:
+  accelerator: gpu
+  num_nodes: 1
+  benchmark: true
+  precision: "16-mixed"
+  strategy: ddp
+  num_sanity_val_steps: 0
+  max_epochs: ${training.epochs}
+  enable_model_summary: true
+  log_every_n_steps: 10
+  check_val_every_n_epoch: 100
+  devices: -1
+
+models:
+  unet:
+    sample_size: ${data.image_resolution}
+
+data:
+  image_resolution: 512
+  batch_size: ${training.batch_size}
+  num_images: 3500
+  use_well_edges: false
+
+inference:
+  num_samples: 1024 # or 50,000
+  scheduler:
+    clip_sample: true
+  pipeline_kwargs:
+    batch_size: 4
+    num_inference_steps: 1000
+
+training:
+  batch_size: 2
+  learning_rate: 1.e-4
+  epochs: 2000
+  ema_decay: 0.9999 # `-1` disables it
