@@ -231,10 +231,10 @@ def main(cfg: DictConfig):
         logger=hy.utils.instantiate(cfg.logger, _recursive_=True),
         **cfg.pl_trainer
     )
+    trainer.logger.experiment.config.update(OmegaConf.to_container(cfg))
     trainer.fit(system, datamodule=datamodule,
                 ckpt_path=cfg.resume_from_checkpoint
                 )
-    wandb.config.update(OmegaConf.to_container(cfg))
 
 
 if __name__ == '__main__':
