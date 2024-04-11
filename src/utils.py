@@ -18,7 +18,7 @@ class PipelineCheckpoint(callbacks.ModelCheckpoint):
                 f'pipeline-{pl_module.current_epoch}'
             )
             pl_module.save_pretrained(pipe_path)
-
+        print(f"Saved checkpoint to {pipe_path}")
         return super().on_save_checkpoint(trainer, pl_module, checkpoint)
 
 

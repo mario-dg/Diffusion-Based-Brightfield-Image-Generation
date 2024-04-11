@@ -168,7 +168,7 @@ class Diffusion(LightningModule):
 
     def save_pretrained(self, path: str, push_to_hub: bool = False):
         self._fix_hydra_config_serialization()
-
+        print(f"Saving pretrained model to {path}")
         pipe = self.pipeline()
         pipe.save_pretrained(path, safe_serialization=True,
                              push_to_hub=push_to_hub)
@@ -202,7 +202,7 @@ class Diffusion(LightningModule):
                 saving_dir = self.logger.experiment.dir  # for wandb
             except AttributeError:
                 saving_dir = self.logger.experiment.log_dir  # for TB
-
+            print(f"Saving validation images to {saving_dir}")
             tv_utils.save_image(image_grid,
                                 os.path.join(saving_dir, f'samples_epoch_{self.current_epoch}.png'))
 

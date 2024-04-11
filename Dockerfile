@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV POETRY_VERSION=1.8.2
 ENV POETRY_HOME=/opt/poetry
 ENV POETRY_VENV=/opt/poetry-venv
-ENV POETRY_CACHE_DIR=/opt/poetry/.cache
+ENV POETRY_CACHE_DIR=/opt/.cache
 
 # Install poetry separated from system interpreter
 RUN python3 -m venv $POETRY_VENV \
@@ -39,13 +39,11 @@ COPY src/ /data/src/
 COPY pyproject.toml /data/
 COPY poetry.lock /data/
 
-RUN poetry config cache-dir ${POETRY_CACHE_DIR}
 RUN poetry install
 RUN poetry run wandb login ${WANDB_TOKEN}
 RUN poetry run huggingface-cli login --token ${HF_TOKEN}
 
 CMD ["/bin/bash"]
 
-# This image let's you create an isolated dev environment for POSTER_V2
-# docker build -t pv2-train .
-# docker run --rm -it --gpus all --shm-size=8g -v .:/app/POSTER_V2 pv2-train
+# docker build --build-arg WANDB_TOKEN=e56c562c8f2e2daf5c6f7ed076f0439155900d4c --build-arg HF_TOKEN=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 -t pldiffusion .
+# docker run --rm -it --gpus '"device=0,1"' --shm-size=256g -v /mnt/beegfs/mario.dejesusdagraca/brightfield-microscopy-scc:/data/.cache pldiffusion
