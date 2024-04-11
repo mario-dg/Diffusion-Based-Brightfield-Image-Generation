@@ -44,6 +44,3 @@ RUN poetry run wandb login ${WANDB_TOKEN}
 RUN poetry run huggingface-cli login --token ${HF_TOKEN}
 
 CMD ["/bin/bash"]
-
-# docker build --build-arg WANDB_TOKEN=e56c562c8f2e2daf5c6f7ed076f0439155900d4c --build-arg HF_TOKEN=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 -t pldiffusion .
-# docker run --rm -it --gpus '"device=0,1"' --shm-size=256g -v /mnt/beegfs/mario.dejesusdagraca/brightfield-microscopy-scc:/data/.cache pldiffusion
