@@ -26,7 +26,7 @@ pl_trainer:
   enable_model_summary: true
   log_every_n_steps: 10
   check_val_every_n_epoch: 10
-  devices: -1
+  devices: 2
 
 models:
   unet:

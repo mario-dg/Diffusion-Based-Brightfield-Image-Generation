@@ -225,7 +225,7 @@ def main(cfg: DictConfig):
         callbacks=[
             callbacks.LearningRateMonitor(
                 'epoch', log_momentum=True, log_weight_decay=True),
-            PipelineCheckpoint(mode='min', monitor='FID'),
+            PipelineCheckpoint(mode='min', monitor='FID', dirpath='../logs/models'),
             callbacks.RichProgressBar()
         ],
         logger=hy.utils.instantiate(cfg.logger, _recursive_=True),

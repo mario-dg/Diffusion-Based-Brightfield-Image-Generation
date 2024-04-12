@@ -23,7 +23,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV POETRY_VERSION=1.8.2
 ENV POETRY_HOME=/opt/poetry
 ENV POETRY_VENV=/opt/poetry-venv
-ENV POETRY_CACHE_DIR=/opt/.cache
 
 # Install poetry separated from system interpreter
 RUN python3 -m venv $POETRY_VENV \
@@ -35,11 +34,14 @@ ENV PATH="${PATH}:${POETRY_VENV}/bin"
 
 WORKDIR /data
 
-COPY src/ /data/src/
+# COPY src/ /data/src/
 COPY pyproject.toml /data/
-COPY poetry.lock /data/
+# COPY poetry.lock /data/
 
-RUN poetry install
+# RUN poetry lock
+RUN --mount=type=cache,target=/home/mario.dejesusdagraca/.cache/pypoetry/cache \
+    --mount=type=cache,target=/home/mario.dejesusdagraca/.cache/pypoetry/artifacts \
+    poetry install
 RUN poetry run wandb login ${WANDB_TOKEN}
 RUN poetry run huggingface-cli login --token ${HF_TOKEN}
 
