@@ -196,10 +196,14 @@ y-py = "0.6.2"
 yarl = "1.9.4"
 ypy-websocket = "0.8.4"
 zipp = "3.17.0"
-torch = "2.1.2"
-torchvision = "0.16.2"
+torch = {version = "2.1.2+cu121", source = "pytorch"}
+torchvision = {version = "0.16.2+cu121", source = "pytorch"}
 triton = "2.1.0"
 
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "explicit"
 
 [build-system]
 requires = ["poetry-core"]
