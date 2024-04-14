@@ -20,7 +20,7 @@ from utils import (
 )
 from dm import ImageDatasets
 
-from diffusers import DDPMPipeline
+from diffusers import DDIMPipeline, DDPMPipeline
 from diffusers.pipelines.pipeline_utils import DiffusionPipeline
 
 # some global stuff necessary for the program
@@ -71,21 +71,25 @@ class Diffusion(LightningModule):
         return self.training_cfg.ema_decay != -1
 
     def _fix_hydra_config_serialization(self) -> None:
+        
         for child in chain(self.children(), vars(self).values()):
             if isinstance(child, ConfigMixin):
                 _fix_hydra_config_serialization(child)
 
     def on_save_checkpoint(self, checkpoint: dict) -> None:
+        
         if self.ema_wanted:
             checkpoint['ema'] = self.ema.state_dict()
         return super().on_save_checkpoint(checkpoint)
 
     def on_load_checkpoint(self, checkpoint: dict) -> None:
+        
         if self.ema_wanted:
             self.ema.load_state_dict(checkpoint['ema'])
         return super().on_load_checkpoint(checkpoint)
 
     def on_before_zero_grad(self, optimizer) -> None:
+        
         if self.ema_wanted:
             self.ema.update(self.model.parameters())
         return super().on_before_zero_grad(optimizer)
@@ -96,6 +100,7 @@ class Diffusion(LightningModule):
         return super().to(*args, **kwargs)
 
     def record_data_for_FID(self, batch, real: bool):
+        
         # batch must be either list of PIL Images, ..
         # .. or, a Tensor of shape (BxCxHxW)
         if isinstance(batch, list):
@@ -105,13 +110,16 @@ class Diffusion(LightningModule):
                          real=real)
 
     def record_fake_data_for_FID(self, batch):
+        
         self.record_data_for_FID(batch, False)
 
     def record_real_data_for_FID(self, batch):
+        
         if self.training and self.current_epoch == 0:
             self.record_data_for_FID(batch, True)
 
     def training_step(self, batch, batch_idx):
+        
         clean_images = batch['images']
 
         self.record_real_data_for_FID((clean_images + 1) / 2.)
@@ -138,6 +146,7 @@ class Diffusion(LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
+        
         return self.training_step(batch, batch_idx)
 
     @contextmanager
@@ -147,6 +156,7 @@ class Diffusion(LightningModule):
         yield ctx
 
     def sample(self, **kwargs: dict):
+        
         kwargs.pop('output_type', None)
         kwargs.pop('return_dict', False)
 
@@ -158,17 +168,17 @@ class Diffusion(LightningModule):
                 output_type="pil",
                 return_dict=False
             )
+        
         return images
 
     def pipeline(self) -> DiffusionPipeline:
-        pipe = DDPMPipeline(self.model, self.infer_scheduler).to(
+        pipe = DDIMPipeline(self.model, self.infer_scheduler).to(
             device=self.device, dtype=self.dtype)  # .to() isn't necessary
         pipe.set_progress_bar_config(disable=True)
         return pipe
 
     def save_pretrained(self, path: str, push_to_hub: bool = False):
         self._fix_hydra_config_serialization()
-        print(f"Saving pretrained model to {path}")
         pipe = self.pipeline()
         pipe.save_pretrained(path, safe_serialization=True,
                              push_to_hub=push_to_hub)
@@ -202,7 +212,6 @@ class Diffusion(LightningModule):
                 saving_dir = self.logger.experiment.dir  # for wandb
             except AttributeError:
                 saving_dir = self.logger.experiment.log_dir  # for TB
-            print(f"Saving validation images to {saving_dir}")
             tv_utils.save_image(image_grid,
                                 os.path.join(saving_dir, f'samples_epoch_{self.current_epoch}.png'))
 
@@ -231,7 +240,8 @@ def main(cfg: DictConfig):
         logger=hy.utils.instantiate(cfg.logger, _recursive_=True),
         **cfg.pl_trainer
     )
-    trainer.logger.experiment.config.update(OmegaConf.to_container(cfg))
+    if trainer.global_rank == 0:
+        trainer.logger.experiment.config.update(OmegaConf.to_container(cfg))
     trainer.fit(system, datamodule=datamodule,
                 ckpt_path=cfg.resume_from_checkpoint
                 )

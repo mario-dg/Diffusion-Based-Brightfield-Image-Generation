@@ -43,8 +43,7 @@ class ImageDatasets(LightningDataModule):
         self.data_dir = cfg_data.data_dir
         self.image_resolution = cfg_data.image_resolution
         self.HF_DATASET_IMAGE_KEY = cfg_data.HF_DATASET_IMAGE_KEY
-        self.num_images = cfg_data.num_images
-        self.use_well_edges = cfg_data.use_well_edges
+        self.num_images = cfg_data.get("num_images", -1)
 
         # Preprocessing the datasets and DataLoaders creation.
         self.augmentations = Compose(
@@ -58,19 +57,31 @@ class ImageDatasets(LightningDataModule):
             ]
         )
 
+    def _get_cache_dir(self) -> str:
+        return "/data/.cache/bfscc_filtered/" if "-filtered" in self.data_dir else "/data/.cache/bfscc/"
+
     def setup(self, stage: str) -> None:
-        dataset = load_hf_dataset(self.data_dir, cache_dir=".cache/")
+        dataset = load_hf_dataset(self.data_dir, cache_dir=self._get_cache_dir())
         dataset.set_transform(
             lambda sample: ImageDatasets._transforms(self, sample)
         )
 
-        if isinstance(dataset, DatasetDict):
-            self.train_dataset = dataset['train'].filter(lambda x: not x["well_edges"] or self.use_well_edges).select(range(self.num_images))
-            self.valid_dataset = dataset['validation'].filter(lambda x: not x["well_edges"] or self.use_well_edges).select(range(500))
-        elif isinstance(dataset, Dataset):
-            split_datasets = dataset.train_test_split(0.1, 0.9, seed=42)
-            self.train_dataset = split_datasets['train'].filter(lambda x: not x["well_edges"] or self.use_well_edges).select(range(self.num_images))
-            self.valid_dataset = split_datasets['validation'].filter(lambda x: not x["well_edges"] or self.use_well_edges).select(range(500))
+        if self.num_images != -1:
+            if isinstance(dataset, DatasetDict):
+                self.train_dataset = dataset['train'].select(range(self.num_images))
+                self.valid_dataset = dataset['validation']
+            elif isinstance(dataset, Dataset):
+                split_datasets = dataset.train_test_split(0.1, 0.9, seed=42)
+                self.train_dataset = split_datasets['train'].select(range(self.num_images))
+                self.valid_dataset = split_datasets['validation']
+        else:
+            if isinstance(dataset, DatasetDict):
+                self.train_dataset = dataset['train']
+                self.valid_dataset = dataset['validation']
+            elif isinstance(dataset, Dataset):
+                split_datasets = dataset.train_test_split(0.1, 0.9, seed=42)
+                self.train_dataset = split_datasets['train']
+                self.valid_dataset = split_datasets['validation']
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset,

@@ -1,0 +1,2 @@
+data_dir: mario-dg/brightfield-microscopy-scc-filtered
+HF_DATASET_IMAGE_KEY: "image"

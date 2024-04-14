@@ -1,3 +1,4 @@
-FROM mariodg/pldiffusion
+
+FROM mariodg/pldiffusion:v1
 
 CMD ["/bin/bash"]

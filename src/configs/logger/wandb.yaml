@@ -1,7 +1,6 @@
 _target_: lightning.pytorch.loggers.WandbLogger
 project: Thesis-Research
-save_dir: "../logs"
-log_model: false
+save_dir: /data/.cache/logs/
 settings:
   _target_: wandb.Settings
   _disable_stats: true

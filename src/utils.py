@@ -1,4 +1,5 @@
 import os.path as osp
+import wandb
 
 from lightning.pytorch import LightningModule, Trainer, callbacks
 from diffusers.configuration_utils import ConfigMixin
@@ -11,14 +12,16 @@ from diffusers.configuration_utils import FrozenDict
 class PipelineCheckpoint(callbacks.ModelCheckpoint):
 
     def on_save_checkpoint(self, trainer: Trainer, pl_module: LightningModule, checkpoint) -> None:
-        # only ema parameters (if any) saved in pipeline
-        with pl_module.maybe_ema():
-            pipe_path = osp.join(
-                osp.dirname(self.best_model_path),
-                f'pipeline-{pl_module.current_epoch}'
-            )
-            pl_module.save_pretrained(pipe_path)
-        print(f"Saved checkpoint to {pipe_path}")
+        if trainer.global_rank == 0:
+            # only ema parameters (if any) saved in pipeline
+            with pl_module.maybe_ema():
+                pipe_path = osp.join(
+                    "/data/.cache/logs/checkpoints",
+                    f'{trainer.logger.experiment.name}',
+                    f'pipeline-{pl_module.current_epoch}'
+                )
+                pl_module.save_pretrained(pipe_path)
+            print(f"Saved checkpoint to {pipe_path}")
         return super().on_save_checkpoint(trainer, pl_module, checkpoint)
 
 
