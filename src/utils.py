@@ -12,16 +12,20 @@ from diffusers.configuration_utils import FrozenDict
 class PipelineCheckpoint(callbacks.ModelCheckpoint):
 
     def on_save_checkpoint(self, trainer: Trainer, pl_module: LightningModule, checkpoint) -> None:
-        # only ema parameters (if any) saved in pipeline
-        with pl_module.maybe_ema():
-            pipe_path = osp.join(
-                self.dirpath,
-                f"pipeline-{pl_module.current_epoch}",
-            )
-            pl_module.save_pretrained(pipe_path)
-        print(f"Saved pipeline to {pipe_path}")
-        print(f"Saving checkpoint to {self.dirpath}")
-        return super().on_save_checkpoint(trainer, pl_module, checkpoint)
+        if trainer.global_rank == 0:
+            if trainer.logger.experiment.name not in self.dirpath:
+                self.dirpath = f"{self.dirpath}/{trainer.logger.experiment.name}"
+            # only ema parameters (if any) saved in pipeline
+            with pl_module.maybe_ema():
+                pipe_path = osp.join(
+                    self.dirpath,
+                    f"pipeline-{pl_module.current_epoch}",
+                )
+                pl_module.save_pretrained(pipe_path)
+            print(f"Saved pipeline to {pipe_path}")
+            print(f"Saving checkpoint to {self.dirpath}")
+            return super().on_save_checkpoint(trainer, pl_module, checkpoint)
+        return None
 
 
 def _fix_hydra_config_serialization(conf_mixin: ConfigMixin):

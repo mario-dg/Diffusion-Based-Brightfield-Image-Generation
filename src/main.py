@@ -207,13 +207,13 @@ class Diffusion(LightningModule):
             images = th.stack([to_tensor(pil_image)
                               for pil_image in pil_images], 0)
             image_grid = tv_utils.make_grid(images,
-                                            nrow=math.ceil(batch_size ** 0.5), padding=1)
+                                            nrow=math.ceil(batch_size ** 0.5), padding=0)
             try:
                 saving_dir = self.logger.experiment.dir  # for wandb
             except AttributeError:
                 saving_dir = self.logger.experiment.log_dir  # for TB
             tv_utils.save_image(image_grid,
-                                os.path.join(saving_dir, f'samples_epoch_{self.current_epoch}.png'))
+                                os.path.join(saving_dir, f'samples_epoch_{self.current_epoch:03d}.png'))
 
     def configure_optimizers(self):
         optim = th.optim.AdamW(
@@ -234,7 +234,7 @@ def main(cfg: DictConfig):
         callbacks=[
             callbacks.LearningRateMonitor(
                 'epoch', log_momentum=True, log_weight_decay=True),
-            PipelineCheckpoint(mode='min', monitor='FID', save_top_k=3),
+            PipelineCheckpoint(mode='min', monitor='FID', save_top_k=3, dirpath="/data/.cache/checkpoints"),
             callbacks.RichProgressBar()
         ],
         logger=hy.utils.instantiate(cfg.logger, _recursive_=True),
