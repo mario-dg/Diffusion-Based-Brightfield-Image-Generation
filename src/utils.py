@@ -13,8 +13,6 @@ class PipelineCheckpoint(callbacks.ModelCheckpoint):
 
     def on_save_checkpoint(self, trainer: Trainer, pl_module: LightningModule, checkpoint) -> None:
         if trainer.global_rank == 0:
-            if trainer.logger.experiment.name not in self.dirpath:
-                self.dirpath = f"{self.dirpath}/{trainer.logger.experiment.name}"
             # only ema parameters (if any) saved in pipeline
             with pl_module.maybe_ema():
                 pipe_path = osp.join(

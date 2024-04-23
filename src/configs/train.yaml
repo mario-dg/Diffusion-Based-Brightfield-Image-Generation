@@ -38,7 +38,7 @@ data:
   num_images: 10000
 
 inference:
-  num_samples: 128 # or 50,000
+  num_samples: 128
   scheduler:
     clip_sample: true
   pipeline_kwargs:

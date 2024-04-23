@@ -230,11 +230,14 @@ def main(cfg: DictConfig):
     OmegaConf.resolve(cfg) # resolve all string interpolation
     system = Diffusion(cfg.models, cfg.training, cfg.inference)
     datamodule = ImageDatasets(cfg.data)
+    run_name = cfg.logger.name 
+    dirpath = f"/data/.cache/checkpoints/{run_name}"
+    print(f"{dirpath=}")
     trainer = Trainer(
         callbacks=[
             callbacks.LearningRateMonitor(
                 'epoch', log_momentum=True, log_weight_decay=True),
-            PipelineCheckpoint(mode='min', monitor='FID', save_top_k=3, dirpath="/data/.cache/checkpoints"),
+            PipelineCheckpoint(mode='min', monitor='FID', save_top_k=3, dirpath=dirpath),
             callbacks.RichProgressBar()
         ],
         logger=hy.utils.instantiate(cfg.logger, _recursive_=True),
