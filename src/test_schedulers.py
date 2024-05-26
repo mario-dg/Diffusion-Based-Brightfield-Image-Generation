@@ -1,13 +1,7 @@
 import os
 from tqdm import trange
-from main import Diffusion
+from train_diffusion import Diffusion
 from diffusers import DPMSolverMultistepScheduler, DPMSolverSinglestepScheduler, EulerDiscreteScheduler, EulerAncestralDiscreteScheduler, DDIMScheduler
-
-# from diffusers.schedulers.scheduling_ddim import DDIMScheduler
-# from diffusers.schedulers.scheduling_dpmsolver_multistep import DPMSolverMultistepScheduler
-# from diffusers.schedulers.scheduling_dpmsolver_singlestep import DPMSolverSingleStepScheduler
-# from diffusers.schedulers.scheduling_euler_discrete import EulerDiscreteScheduler
-# from diffusers.schedulers.scheduling_euler_ancestral_discrete import EulerAncestralDiscreteScheduler
 
 BASE_MODEL_PATH = "/data/.cache/checkpoints"
 SAMPLE_PATH = "/data/.cache/samples"
@@ -50,17 +44,16 @@ RUNS = {
     ],
 }
 
-INFERENCE_STEPS = [25, 30, 35, 40, 45]
 SAMPLERS = {
-    "DPM++ 2M": DPMSolverMultistepScheduler(prediction_type="v_prediction", solver_order=3, timestep_spacing="trailing"),
-    "DPM++ 2M Karras": DPMSolverMultistepScheduler(prediction_type="v_prediction", solver_order=3, use_karras_sigmas=True, timestep_spacing="trailing"),
-    "DPM++ 2M SDE": DPMSolverMultistepScheduler(prediction_type="v_prediction", solver_order=3, algorithm_type="sde-dpmsolver++", timestep_spacing="trailing"),
-    "DPM++ 2M SDE Karras": DPMSolverMultistepScheduler(prediction_type="v_prediction", solver_order=3, use_karras_sigmas=True, algorithm_type="sde-dpmsolver++", timestep_spacing="trailing"),
-    # "DPM++ SDE": DPMSolverSinglestepScheduler(solver_order=3, timestep_spacing="trailing"),
-    # "DPM++ SDE Karras": DPMSolverSinglestepScheduler(solver_order=3, use_karras_sigmas=True, timestep_spacing="trailing"),
-    "Euler": EulerDiscreteScheduler(prediction_type="v_prediction", timestep_spacing="trailing"),
-    "Euler a": EulerAncestralDiscreteScheduler(prediction_type="v_prediction", timestep_spacing="trailing"),
-    "DDIM": DDIMScheduler(prediction_type="v_prediction", timestep_spacing="trailing"),
+    "DPM++ 2M": DPMSolverMultistepScheduler(solver_order=3, timestep_spacing="trailing"),
+    "DPM++ 2M Karras": DPMSolverMultistepScheduler(solver_order=3, use_karras_sigmas=True, timestep_spacing="trailing"),
+    "DPM++ 2M SDE": DPMSolverMultistepScheduler(solver_order=3, algorithm_type="sde-dpmsolver++", timestep_spacing="trailing"),
+    "DPM++ 2M SDE Karras": DPMSolverMultistepScheduler(solver_order=3, use_karras_sigmas=True, algorithm_type="sde-dpmsolver++", timestep_spacing="trailing"),
+    "DPM++ SDE": DPMSolverSinglestepScheduler(solver_order=3, timestep_spacing="trailing"),
+    "DPM++ SDE Karras": DPMSolverSinglestepScheduler(solver_order=3, use_karras_sigmas=True, timestep_spacing="trailing"),
+    "Euler": EulerDiscreteScheduler(timestep_spacing="trailing"),
+    "Euler a": EulerAncestralDiscreteScheduler(timestep_spacing="trailing"),
+    "DDIM": DDIMScheduler(timestep_spacing="trailing"),
 }
 STEPS_PER_SAMPLER = {
     "DPM++ 2M": [10, 15, 20, 25, 30, 35, 40, 45],

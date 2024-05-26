@@ -1,12 +1,10 @@
 import os.path as osp
-import wandb
-
-from lightning.pytorch import LightningModule, Trainer, callbacks
-from diffusers.configuration_utils import ConfigMixin
 
 from omegaconf.listconfig import ListConfig
 from omegaconf.dictconfig import DictConfig
-from diffusers.configuration_utils import FrozenDict
+
+from lightning.pytorch import LightningModule, Trainer, callbacks
+from diffusers.configuration_utils import ConfigMixin, FrozenDict
 
 
 class PipelineCheckpoint(callbacks.ModelCheckpoint):

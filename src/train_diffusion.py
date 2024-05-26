@@ -18,7 +18,7 @@ from utils import (
     _fix_hydra_config_serialization,
     ConfigMixin
 )
-from dm import ImageDatasets
+from image_datasets import ImageDatasets
 
 from diffusers import DDIMPipeline, DDPMPipeline
 from diffusers.pipelines.pipeline_utils import DiffusionPipeline

@@ -1,6 +1,5 @@
-import torch as th
 import random
-from main import Diffusion
+from train_diffusion import Diffusion
 from diffusers import EulerAncestralDiscreteScheduler
 from tqdm import trange
 
