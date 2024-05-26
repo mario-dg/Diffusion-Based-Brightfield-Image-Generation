@@ -17,7 +17,7 @@ class PipelineCheckpoint(callbacks.ModelCheckpoint):
             with pl_module.maybe_ema():
                 pipe_path = osp.join(
                     self.dirpath,
-                    f"pipeline-{pl_module.current_epoch}",
+                    f"pipeline-{pl_module.current_epoch:03d}",
                 )
                 pl_module.save_pretrained(pipe_path)
             print(f"Saved pipeline to {pipe_path}")

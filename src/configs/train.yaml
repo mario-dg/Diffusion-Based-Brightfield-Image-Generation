@@ -1,5 +1,5 @@
 defaults:
-  - model@models.unet:  scc_v2 # diffusers_native
+  - model@models.unet:  scc_v5 # diffusers_native
   - data: bfscc_filtered
   - scheduler@training.scheduler: ddim
   - scheduler@inference.scheduler: ddim
