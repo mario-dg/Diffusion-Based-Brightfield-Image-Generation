@@ -7,13 +7,13 @@ VERSION = "v1"
 BASE_MODELS_PATH = "models/base/"
 
 MODELS = {
-    "yolov8s", [YOLO, f"{BASE_MODELS_PATH}yolov8s.pt"],
-    "yolov8m", [YOLO, f"{BASE_MODELS_PATH}yolov8m.pt"],
-    "yolov8x", [YOLO, f"{BASE_MODELS_PATH}yolov8x.pt"],
-    "yolov9c", [YOLO, f"{BASE_MODELS_PATH}yolov9c.pt"],
-    "yolov9e", [YOLO, f"{BASE_MODELS_PATH}yolov9e.pt"],
-    "rtdetr-l", [RTDETR, f"{BASE_MODELS_PATH}rtdetr-l.pt"],
-    "rtdetr-x", [RTDETR, f"{BASE_MODELS_PATH}rtdetr-x.pt"],
+    "yolov8s": [YOLO, f"{BASE_MODELS_PATH}yolov8s.pt"],
+    "yolov8m": [YOLO, f"{BASE_MODELS_PATH}yolov8m.pt"],
+    "yolov8x": [YOLO, f"{BASE_MODELS_PATH}yolov8x.pt"],
+    "yolov9c": [YOLO, f"{BASE_MODELS_PATH}yolov9c.pt"],
+    "yolov9e": [YOLO, f"{BASE_MODELS_PATH}yolov9e.pt"],
+    "rtdetr-l": [RTDETR, f"{BASE_MODELS_PATH}rtdetr-l.pt"],
+    "rtdetr-x": [RTDETR, f"{BASE_MODELS_PATH}rtdetr-x.pt"],
 }
 
 DATASETS = {
