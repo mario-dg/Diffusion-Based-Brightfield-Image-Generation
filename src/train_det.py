@@ -30,36 +30,37 @@ IMGSZ = 512
 DEVICE = "cuda:0"
 SAVE_PERIOD = 10
 
-for ds_name, ds_path in DATASETS.items():
-    for model_name, model_info in MODELS.items():
-        run = wandb.init(
-            project="Thesis-Research-Detection", 
-            name=model_name,
-            group=f"{VERSION}_{ds_name}", 
-            save_code=True, 
-            config={
-                "model": model_name,
-                "dataset": ds_name,
-                "epochs": EPOCHS,
-                "patience": PATIENCE,
-                "batch": BATCH,
-                "imgsz": IMGSZ,
-                "device": DEVICE,
-            })
+if __name__ == "__main__":
+    for ds_name, ds_path in DATASETS.items():
+        for model_name, model_info in MODELS.items():
+            run = wandb.init(
+                project="Thesis-Research-Detection", 
+                name=model_name,
+                group=f"{VERSION}_{ds_name}", 
+                save_code=True, 
+                config={
+                    "model": model_name,
+                    "dataset": ds_name,
+                    "epochs": EPOCHS,
+                    "patience": PATIENCE,
+                    "batch": BATCH,
+                    "imgsz": IMGSZ,
+                    "device": DEVICE,
+                })
 
-        model_class, model_path = model_info[0], model_info[1]
-        model = model_class(model_path)
-        for cb_event, cb in wandb_callbacks.items():
-            model.add_callback(cb_event, cb)
+            model_class, model_path = model_info[0], model_info[1]
+            model = model_class(model_path)
+            for cb_event, cb in wandb_callbacks.items():
+                model.add_callback(cb_event, cb)
 
-        model.train(
-            data=ds_path,
-            epochs=EPOCHS,
-            patience=PATIENCE,
-            batch=BATCH,
-            imgsz=IMGSZ,
-            device=DEVICE,
-            save_period=SAVE_PERIOD,
-            plots=True,
-            project=f"{VERSION}_{ds_name}_{model_name}",
-        )
+            model.train(
+                data=ds_path,
+                epochs=EPOCHS,
+                patience=PATIENCE,
+                batch=BATCH,
+                imgsz=IMGSZ,
+                device=DEVICE,
+                save_period=SAVE_PERIOD,
+                plots=True,
+                project=f"{VERSION}_{ds_name}_{model_name}",
+            )
