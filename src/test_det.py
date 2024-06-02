@@ -7,6 +7,8 @@ from ultralytics.utils.callbacks.wb import callbacks as wandb_callbacks
 
 VERSION = "v1"
 BASE_ARTIFACTS_PATH = "m-dagraca/Thesis-Research-Detection/"
+DOWNLOAD_ARTIFACTS_PATH = "trained_models"
+CONFIDENCE = 0.5
 
 TRAINED_MODELS = {
     "real_yolov8s": [YOLO, "run_65yqro5s_model:v0"],
@@ -39,56 +41,60 @@ TRAINED_MODELS = {
     "50_rtdetr-x": [RTDETR, "run_8u0jyiql_model:v0"],
 }
 
-for model_name, model_info in TRAINED_MODELS.items():
-    model_class, artifact_name = model_info[0], model_info[1]
+if __name__ == "__main__":
+    for model_name, model_info in TRAINED_MODELS.items():
+        model_class, artifact_name = model_info[0], model_info[1]
 
-    run = wandb.init(
-        project="Thesis-Research-Detection", 
-        name=model_name,
-        group=f"{VERSION}_scc_cell_detection_{model_name.split('_')[0]}_test", 
-        save_code=True,
-        config={
-            "model": model_name,
-            "dataset": f"scc_cell_detection_{model_name.split('_')[0]}",
-            "imgsz": 512,
-            "batch": 32,
-            "conf": 0.5,
-            "device": "cuda:0",
-        })
+        run = wandb.init(
+            project="Thesis-Research-Detection", 
+            name=model_name,
+            group=f"{VERSION}_scc_cell_detection_{model_name.split('_')[0]}_test_conf_{CONFIDENCE}", 
+            save_code=True,
+            config={
+                "model": model_name,
+                "dataset": f"scc_cell_detection_{model_name.split('_')[0]}",
+                "imgsz": 512,
+                "batch": 32,
+                "conf": CONFIDENCE,
+                "device": "cuda:0",
+            })
 
-    artifact = run.use_artifact(f"{BASE_ARTIFACTS_PATH}{artifact_name}", type='model', aliases=f"{model_name}_best.pt")
-    artifact_dir = artifact.download(root="trained_models")
-    model_file = os.path.join(artifact_dir, f"{model_name}_best.pt")
-    os.rename(f"{artifact_dir}/best.pt", model_file)
+        model_file = os.path.join(DOWNLOAD_ARTIFACTS_PATH, f"{model_name}_best.pt")
+        artifact = run.use_artifact(f"{BASE_ARTIFACTS_PATH}{artifact_name}", type='model')
+        if not os.path.exists(model_file):
+            artifact_dir = artifact.download(root=DOWNLOAD_ARTIFACTS_PATH)
+            os.rename(f"{artifact_dir}/best.pt", model_file)
 
-    model = YOLO(model_file)
-    for cb_event, cb in wandb_callbacks.items():
-        model.add_callback(cb_event, cb)
+        model = YOLO(model_file)
+        for cb_event, cb in wandb_callbacks.items():
+            model.add_callback(cb_event, cb)
 
-    metrics = model.val(
-        imgsz=run.config.imgsz,
-        batch=run.config.batch,
-        conf=run.config.conf,
-        save_json=True,
-        save_hybrid=True,
-        device=run.config.device,
-        plots=True,
-        split="test",
-    )
-    print()
-    print()
-    print()
-    print()
-    print()
-    print()
-    print(metrics)
-    wandb.finish()
-    break
+        metrics = model.val(
+            imgsz=run.config.imgsz,
+            batch=run.config.batch,
+            conf=run.config.conf,
+            save_json=True,
+            save_hybrid=True,
+            device=run.config.device,
+            plots=True,
+            split="test",
+        )
 
-# run = wandb.init(
-#                 project="Thesis-Research-Detection", 
-#                 name=model_name,
-#                 group=f"{VERSION}_{ds_name}", 
-#                 save_code=True, )
-# artifact = run.use_artifact('m-dagraca/Thesis-Research-Detection/run_u0k5i0o0_model:v0', type='model')
-# artifact_dir = artifact.download()
+        result_dir = wandb.Artifact("plots", type="results")
+        result_dir.add_dir(metrics.save_dir)
+
+        run.log({m_name: metric for m_name, metric in metrics.results_dict.items()})
+        run.log_artifact(result_dir)
+
+        for idx, curve in enumerate(metrics.curves[1:]):
+            data = [[x, y] for x, y in zip(list(metrics.curves_results[idx][0]), list(metrics.curves_results[idx][1][0]))]
+            table = wandb.Table(data=data, columns=[metrics.curves_results[idx][2], metrics.curves_results[idx][3]])
+            wandb.log(
+                {
+                    curve: wandb.plot.line(
+                        table, metrics.curves_results[idx][2], metrics.curves_results[idx][3], title=curve,
+                    )
+                }
+            )
+
+        wandb.finish()
