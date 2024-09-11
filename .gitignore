@@ -1,7 +1,13 @@
 datasets/*/
 models/**/*.pt
 wandb/
+trained_models/*.pt
 **.rar
+**.pt
+sweep/  
+runs/
+data/
+models_analyze/
 # Created by https://www.toptal.com/developers/gitignore/api/python,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,visualstudiocode
 

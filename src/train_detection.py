@@ -38,6 +38,7 @@ if __name__ == "__main__":
                 name=model_name,
                 group=f"{VERSION}_{ds_name}", 
                 save_code=True, 
+                tags=["train"],
                 config={
                     "model": model_name,
                     "dataset": ds_name,
