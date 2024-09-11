@@ -2,7 +2,6 @@ import os.path as osp
 
 from omegaconf.listconfig import ListConfig
 from omegaconf.dictconfig import DictConfig
-
 from lightning.pytorch import LightningModule, Trainer, callbacks
 from diffusers.configuration_utils import ConfigMixin, FrozenDict
 

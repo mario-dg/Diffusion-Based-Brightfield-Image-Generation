@@ -1,7 +1,15 @@
 import os
+
 from tqdm import trange
 from train_diffusion import Diffusion
-from diffusers import DPMSolverMultistepScheduler, DPMSolverSinglestepScheduler, EulerDiscreteScheduler, EulerAncestralDiscreteScheduler, DDIMScheduler
+
+from diffusers import (
+    DPMSolverMultistepScheduler, 
+    DPMSolverSinglestepScheduler, 
+    EulerDiscreteScheduler, 
+    EulerAncestralDiscreteScheduler, 
+    DDIMScheduler
+)
 
 BASE_MODEL_PATH = "/data/.cache/checkpoints"
 SAMPLE_PATH = "/data/.cache/samples"

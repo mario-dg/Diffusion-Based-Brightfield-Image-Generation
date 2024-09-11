@@ -1,30 +1,27 @@
 import os
 import math
-import wandb
-from itertools import chain
-
+import torch
 import hydra as hy
+
+from itertools import chain
+from diffusers import DDIMPipeline
+from image_datasets import ImageDatasets
 from omegaconf import DictConfig, OmegaConf
 from contextlib import contextmanager, nullcontext
-
-import torch as th
-from torchvision import transforms, utils as tv_utils
-from lightning.pytorch import callbacks, Trainer, LightningModule
-from torchmetrics.image.fid import FrechetInceptionDistance
 from torch_ema import ExponentialMovingAverage as EMA
+from torchvision import transforms, utils as tv_utils
+from torchmetrics.image.fid import FrechetInceptionDistance
+from diffusers.pipelines.pipeline_utils import DiffusionPipeline
+from lightning.pytorch import callbacks, Trainer, LightningModule
 
 from utils import (
     PipelineCheckpoint,
     _fix_hydra_config_serialization,
     ConfigMixin
 )
-from image_datasets import ImageDatasets
 
-from diffusers import DDIMPipeline, DDPMPipeline
-from diffusers.pipelines.pipeline_utils import DiffusionPipeline
-
-# some global stuff necessary for the program
-th.set_float32_matmul_precision('medium')
+# some global stuff
+torch.set_float32_matmul_precision('medium')
 to_tensor = transforms.ToTensor()
 
 
@@ -104,7 +101,7 @@ class Diffusion(LightningModule):
         # batch must be either list of PIL Images, ..
         # .. or, a Tensor of shape (BxCxHxW)
         if isinstance(batch, list):
-            batch = th.stack([to_tensor(pil_image)
+            batch =torch.stack([to_tensor(pil_image)
                               for pil_image in batch], 0)
         self._fid.update(batch.to(dtype=self.dtype, device=self.device),
                          real=real)
@@ -124,8 +121,8 @@ class Diffusion(LightningModule):
 
         self.record_real_data_for_FID((clean_images + 1) / 2.)
 
-        noise = th.randn_like(clean_images)
-        timesteps = th.randint(
+        noise =torch.randn_like(clean_images)
+        timesteps =torch.randint(
             low=0,
             high=self.train_scheduler.config.num_train_timesteps,
             size=(clean_images.size(0), ), device=self.device
@@ -135,7 +132,7 @@ class Diffusion(LightningModule):
 
         # Predict the noise residual
         model_output = self.model(noisy_images, timesteps).sample
-        loss = th.nn.functional.mse_loss(model_output, noise)
+        loss =torch.nn.functional.mse_loss(model_output, noise)
 
         log_key = f'{"train" if self.training else "val"}/simple_loss'
         self.log_dict({log_key: loss},
@@ -204,7 +201,7 @@ class Diffusion(LightningModule):
                      prog_bar=True, on_epoch=True, sync_dist=True)
 
         if self.global_rank == 0:
-            images = th.stack([to_tensor(pil_image)
+            images =torch.stack([to_tensor(pil_image)
                               for pil_image in pil_images], 0)
             image_grid = tv_utils.make_grid(images,
                                             nrow=math.ceil(batch_size ** 0.5), padding=0)
@@ -216,9 +213,9 @@ class Diffusion(LightningModule):
                                 os.path.join(saving_dir, f'samples_epoch_{self.current_epoch:03d}.png'))
 
     def configure_optimizers(self):
-        optim = th.optim.AdamW(
+        optim =torch.optim.AdamW(
             self.parameters(), lr=self.training_cfg.learning_rate)
-        sched = th.optim.lr_scheduler.StepLR(optim, 1, gamma=0.99)
+        sched =torch.optim.lr_scheduler.StepLR(optim, 1, gamma=0.99)
         return {
             'optimizer': optim,
             'lr_scheduler': {'scheduler': sched, 'interval': 'epoch', 'frequency': 1}

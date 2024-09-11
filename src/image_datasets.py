@@ -1,5 +1,8 @@
 import os
+
 from omegaconf import DictConfig
+from torch.utils.data import DataLoader
+from lightning import LightningDataModule
 
 from datasets import (
     load_from_disk,
@@ -7,7 +10,6 @@ from datasets import (
     DatasetDict,
     Dataset
 )
-from torch.utils.data import DataLoader
 
 from torchvision.transforms import (
     CenterCrop,
@@ -17,10 +19,6 @@ from torchvision.transforms import (
     RandomHorizontalFlip,
     Resize,
     ToTensor,
-)
-
-from lightning import (
-    LightningDataModule
 )
 
 

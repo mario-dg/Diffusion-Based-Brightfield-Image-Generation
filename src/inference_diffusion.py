@@ -1,7 +1,8 @@
 import random
+
+from tqdm import trange
 from train_diffusion import Diffusion
 from diffusers import EulerAncestralDiscreteScheduler
-from tqdm import trange
 
 CKPT_PATH = "/data/.cache/checkpoints/scc_v3-10000-filtered-v4/epoch=319-step=400000.ckpt"
 
