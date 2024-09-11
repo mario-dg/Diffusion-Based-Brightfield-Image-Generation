@@ -27,17 +27,21 @@ EPOCHS = 200
 PATIENCE = 35
 BATCH = 16
 IMGSZ = 512
-DEVICE = "cuda:0"
+DEVICE = "cuda:1"
 SAVE_PERIOD = 10
 
 if __name__ == "__main__":
     for ds_name, ds_path in DATASETS.items():
         for model_name, model_info in MODELS.items():
+            if ds_name == "scc_cell_detection_real" and (model_name in ["yolov8s", "yolov8m", "yolov8x", "yolov9c"]):
+                print(f"skipped {model_name} for {ds_name}")
+                continue
             run = wandb.init(
                 project="Thesis-Research-Detection", 
                 name=model_name,
                 group=f"{VERSION}_{ds_name}", 
                 save_code=True, 
+                tags=["train"],
                 config={
                     "model": model_name,
                     "dataset": ds_name,

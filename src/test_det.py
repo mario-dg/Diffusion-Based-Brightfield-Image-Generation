@@ -5,8 +5,10 @@ from ultralytics import YOLO, RTDETR
 from ultralytics.utils.callbacks.wb import callbacks as wandb_callbacks
 
 
-VERSION = "v1"
+VERSION = "v3"
 BASE_ARTIFACTS_PATH = "m-dagraca/Thesis-Research-Detection/"
+DOWNLOAD_ARTIFACTS_PATH = "trained_models"
+CONFIDENCE = 0.6
 
 TRAINED_MODELS = {
     "real_yolov8s": [YOLO, "run_65yqro5s_model:v0"],
@@ -39,56 +41,93 @@ TRAINED_MODELS = {
     "50_rtdetr-x": [RTDETR, "run_8u0jyiql_model:v0"],
 }
 
-for model_name, model_info in TRAINED_MODELS.items():
-    model_class, artifact_name = model_info[0], model_info[1]
+UNTRAINED_MODELS = {
+    "base_yolov8s": [YOLO, "models/base/yolov8s.pt"],
+    "base_yolov8m": [YOLO, "models/base/yolov8m.pt"],
+    "base_yolov8x": [YOLO, "models/base/yolov8x.pt"],
+    "base_yolov9c": [YOLO, "models/base/yolov9c.pt"],
+    "base_yolov9e": [YOLO, "models/base/yolov9e.pt"],
+    "base_rtdetr-l": [RTDETR, "models/base/rtdetr-l.pt"],
+    "base_rtdetr-x": [RTDETR, "models/base/rtdetr-x.pt"],
+}
 
-    run = wandb.init(
-        project="Thesis-Research-Detection", 
-        name=model_name,
-        group=f"{VERSION}_scc_cell_detection_{model_name.split('_')[0]}_test", 
-        save_code=True,
-        config={
-            "model": model_name,
-            "dataset": f"scc_cell_detection_{model_name.split('_')[0]}",
-            "imgsz": 512,
-            "batch": 32,
-            "conf": 0.5,
-            "device": "cuda:0",
-        })
+if __name__ == "__main__":
+    for model_name, model_info in TRAINED_MODELS.items():
+        model_class, artifact_name = model_info[0], model_info[1]
 
-    artifact = run.use_artifact(f"{BASE_ARTIFACTS_PATH}{artifact_name}", type='model', aliases=f"{model_name}_best.pt")
-    artifact_dir = artifact.download(root="trained_models")
-    model_file = os.path.join(artifact_dir, f"{model_name}_best.pt")
-    os.rename(f"{artifact_dir}/best.pt", model_file)
+        run = wandb.init(
+            project="Thesis-Research-Detection2", 
+            name=model_name,
+            group=f"{VERSION}_scc_cell_detection_{model_name.split('_')[0]}_test_conf_{CONFIDENCE}", 
+            save_code=True,
+            tags=['test'],
+            config={
+                "model": model_name,
+                "dataset": f"scc_cell_detection_{model_name.split('_')[0]}",
+                "imgsz": 512,
+                "batch": 32,
+                "conf": CONFIDENCE,
+                "device": "cuda:0",
+            })
 
-    model = YOLO(model_file)
-    for cb_event, cb in wandb_callbacks.items():
-        model.add_callback(cb_event, cb)
+        if artifact_name.startswith("run_"):
+            model_file = os.path.join(DOWNLOAD_ARTIFACTS_PATH, f"{model_name}_best.pt")
+            artifact = run.use_artifact(f"{BASE_ARTIFACTS_PATH}{artifact_name}", type='model')
+            if not os.path.exists(model_file):
+                artifact_dir = artifact.download(root=DOWNLOAD_ARTIFACTS_PATH)
+                os.rename(f"{artifact_dir}/best.pt", model_file)
+                
+            model = model_class(model_file)
+            for cb_event, cb in wandb_callbacks.items():
+                model.add_callback(cb_event, cb)
 
-    metrics = model.val(
-        imgsz=run.config.imgsz,
-        batch=run.config.batch,
-        conf=run.config.conf,
-        save_json=True,
-        save_hybrid=True,
-        device=run.config.device,
-        plots=True,
-        split="test",
-    )
-    print()
-    print()
-    print()
-    print()
-    print()
-    print()
-    print(metrics)
-    wandb.finish()
-    break
+            metrics = model.val(
+                data="datasets/scc_cell_detection_real/data.yaml",
+                imgsz=run.config.imgsz,
+                split="test",
+                batch=run.config.batch,
+                conf=run.config.conf,
+                save_json=True,
+                save_hybrid=True,
+                device=run.config.device,
+                plots=True,
+                name=model_name,
+            )
+        else:
+            model_file = artifact_name
+            
+            model = model_class(model_file)
+            for cb_event, cb in wandb_callbacks.items():
+                model.add_callback(cb_event, cb)
 
-# run = wandb.init(
-#                 project="Thesis-Research-Detection", 
-#                 name=model_name,
-#                 group=f"{VERSION}_{ds_name}", 
-#                 save_code=True, )
-# artifact = run.use_artifact('m-dagraca/Thesis-Research-Detection/run_u0k5i0o0_model:v0', type='model')
-# artifact_dir = artifact.download()
+            metrics = model.val(
+                data="datasets/scc_cell_detection_real/data.yaml",
+                split="test",
+                imgsz=run.config.imgsz,
+                batch=run.config.batch,
+                conf=run.config.conf,
+                save_json=True,
+                save_hybrid=True,
+                device=run.config.device,
+                plots=True,
+            )
+
+
+        result_dir = wandb.Artifact("plots", type="results")
+        result_dir.add_dir(metrics.save_dir)
+
+        run.log({m_name: metric for m_name, metric in metrics.results_dict.items()})
+        run.log_artifact(result_dir)
+
+        for idx, curve in enumerate(metrics.curves[1:]):
+            data = [[x, y] for x, y in zip(list(metrics.curves_results[idx][0]), list(metrics.curves_results[idx][1][0]))]
+            table = wandb.Table(data=data, columns=[metrics.curves_results[idx][2], metrics.curves_results[idx][3]])
+            wandb.log(
+                {
+                    curve: wandb.plot.line(
+                        table, metrics.curves_results[idx][2], metrics.curves_results[idx][3], title=curve,
+                    )
+                }
+            )
+
+        wandb.finish()
