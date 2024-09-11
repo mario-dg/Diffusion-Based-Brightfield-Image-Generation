@@ -11,6 +11,11 @@ diffusion.infer_scheduler = EulerAncestralDiscreteScheduler(timestep_spacing="tr
 N = 10_000
 B = 16
 
+###########################################################
+# Generate final 10_000 samples to be labeled and used in #
+# the object detection task                               #
+###########################################################
+
 count = 1
 with diffusion.metrics():
     for i in trange(N // B):
