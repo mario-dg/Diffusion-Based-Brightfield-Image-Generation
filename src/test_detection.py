@@ -8,7 +8,7 @@ from ultralytics.utils.callbacks.wb import callbacks as wandb_callbacks
 VERSION = "v1"
 BASE_ARTIFACTS_PATH = "m-dagraca/Thesis-Research-Detection/"
 DOWNLOAD_ARTIFACTS_PATH = "trained_models"
-CONFIDENCE = 0.5
+CONFIDENCE = 0.2
 
 TRAINED_MODELS = {
     "real_yolov8s": [YOLO, "run_65yqro5s_model:v0"],

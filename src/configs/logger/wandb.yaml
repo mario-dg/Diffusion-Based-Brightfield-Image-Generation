@@ -1,7 +1,7 @@
 _target_: lightning.pytorch.loggers.WandbLogger
-project: Thesis-Research
+project: Thesis-Research-Diffusion
 save_dir: "/data/.cache/"
-name: "scc_v5-10000-filtered-v4"
+name: ""
 settings:
   _target_: wandb.Settings
   _disable_stats: true
