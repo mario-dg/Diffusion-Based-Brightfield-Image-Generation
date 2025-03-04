@@ -39,9 +39,7 @@ COPY pyproject.toml /data/
 # COPY poetry.lock /data/
 
 # RUN poetry lock
-RUN --mount=type=cache,target=/home/mario.dejesusdagraca/.cache/pypoetry/cache \
-    --mount=type=cache,target=/home/mario.dejesusdagraca/.cache/pypoetry/artifacts \
-    poetry install
+RUN poetry install
 RUN poetry run wandb login ${WANDB_TOKEN}
 RUN poetry run huggingface-cli login --token ${HF_TOKEN}
 
