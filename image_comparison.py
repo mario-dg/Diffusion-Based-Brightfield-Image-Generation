@@ -7,8 +7,8 @@ from tqdm import tqdm
 from skimage import io, color
 from concurrent.futures import ThreadPoolExecutor
 
-REAL_IMAGES = glob.glob('datasets/scc_cell_detection_real/**/*.png', recursive=True)
-GENERATED_IMAGES = glob.glob('datasets/scc_cell_detection_fake/train/images/*.jpg')
+REAL_IMAGES = glob.glob('datasets/scc_real/**/*.png', recursive=True)
+GENERATED_IMAGES = glob.glob('datasets/scc_generated/train/images/*.jpg')
 
 print(f"Found {len(REAL_IMAGES)} real images and {len(GENERATED_IMAGES)} generated images.")
 
