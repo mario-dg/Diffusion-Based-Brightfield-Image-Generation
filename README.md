@@ -1,7 +1,5 @@
-# Thesis Research
-This repo contains the code I wrote to do the research for my masters thesis:
-
-> Leveraging Diffusion-Based Image Generation to Investigate its Impact on Single Cell Detection Accuracy
+# Diffusion Based Brightfield Microscopy Image Generation
+This repo contains the code to train unconditional diffusion models for synthetic brightfield microscopy image generation and training/evaluating state-of-the-art object detection models on datasets with varying proportions of synthetic images.
 
 ## filter_well_edge_app.py
 A small tkinter utility that lazily displays all real brightfield microscopy images that I acquired for this thesis.
